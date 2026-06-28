@@ -12,18 +12,59 @@ so they are safe to include in CI and will only run when secrets are configured.
 
 Test design: equivalence partitioning — one representative from the valid partition
 and one from the invalid partition for each input dimension.
+
+NOTE: The IT portal rate-limits consecutive requests from the same IP.
+A 3-second inter-test cooldown (via the `rate_limit_pause` autouse fixture)
+prevents ERR_EMPTY_RESPONSE on back-to-back test runs.
 """
 
+import time
+import pytest
 from playwright.sync_api import TimeoutError as PlaywrightTimeout
 
 LOGIN_URL = "https://eportal.incometax.gov.in/iec/foservices/#/login"
 
 
+# ---------------------------------------------------------------------------
+# Rate-limit guard: pause 3 s between tests to avoid portal throttling
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(autouse=True)
+def rate_limit_pause():
+    """
+    The IT portal throttles back-to-back browser sessions from the same IP.
+    A small pause between each test prevents ERR_EMPTY_RESPONSE on the second test.
+    """
+    yield
+    time.sleep(3)
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def _navigate_to_login(page):
+    """
+    Navigate to the login page, retrying once on ERR_EMPTY_RESPONSE.
+    The portal occasionally drops the first connection; a single retry
+    covers the vast majority of transient failures.
+    """
+    try:
+        page.goto(LOGIN_URL, timeout=30000)
+    except Exception as e:
+        if "ERR_EMPTY_RESPONSE" in str(e) or "net::" in str(e):
+            time.sleep(5)
+            page.goto(LOGIN_URL, timeout=30000)
+        else:
+            raise
+
+
 def _do_login(page, pan: str, password: str):
-    """Helper: perform the full login sequence up to the dashboard wait."""
-    page.goto(LOGIN_URL, timeout=30000)
+    """Helper: perform the full login sequence up to submitting the password."""
+    _navigate_to_login(page)
     page.wait_for_selector("#panAdhaarUserId", state="visible", timeout=30000)
     page.type("#panAdhaarUserId", pan, delay=80)
+    page.wait_for_timeout(1000)  # let client-side validation enable the button
     page.click("button.large-button-primary")
 
     page.wait_for_selector("#passwordCheckBox-input", state="visible")
@@ -35,6 +76,10 @@ def _do_login(page, pan: str, password: str):
     page.press("#loginPasswordField", "Enter")
 
 
+# ---------------------------------------------------------------------------
+# Test suite
+# ---------------------------------------------------------------------------
+
 class TestLoginFlow:
     """Tests for the portal authentication flow."""
 
@@ -44,7 +89,7 @@ class TestLoginFlow:
         Boundary: page must load and be interactive within 30 s.
         """
         _, page = browser_context
-        page.goto(LOGIN_URL, timeout=30000)
+        _navigate_to_login(page)
         page.wait_for_selector("#panAdhaarUserId", state="visible", timeout=30000)
         assert page.locator("#panAdhaarUserId").is_visible(), (
             "PAN input field should be visible on the login page"
@@ -98,26 +143,37 @@ class TestLoginFlow:
 
     def test_login_with_invalid_pan_shows_error(self, browser_context):
         """
-        Negative / boundary test: a syntactically invalid PAN should surface
-        an error message without crashing the automation.
+        Negative / boundary test: a syntactically invalid PAN (wrong length/format)
+        should be rejected by the portal's client-side validation.
+
         Equivalence class: invalid PAN partition.
+
+        Expected behavior (confirmed by manual observation):
+        - The portal validates PAN format in the browser before enabling the submit button.
+        - "INVALID123" (9 chars, wrong pattern) keeps the button DISABLED.
+        - A disabled button IS the correct error signal — no separate error message needed.
+        - We must NOT try to click a disabled button; instead assert it stays disabled.
         """
         _, page = browser_context
-        page.goto(LOGIN_URL, timeout=30000)
+        _navigate_to_login(page)
         page.wait_for_selector("#panAdhaarUserId", state="visible", timeout=30000)
 
-        # Use an obviously invalid PAN (wrong format)
+        # Type a PAN that fails the format check (wrong length, wrong pattern)
         page.type("#panAdhaarUserId", "INVALID123", delay=50)
-        page.click("button.large-button-primary")
 
-        # Portal should either show a validation error or not proceed to password step
-        page.wait_for_timeout(3000)
+        # Wait for client-side validation to run
+        page.wait_for_timeout(2000)
 
-        # Assert: we should NOT reach the password field (invalid PAN rejected)
-        # OR an error message is displayed
-        password_visible = page.locator("#loginPasswordField").is_visible()
-        error_visible = page.locator(".error-msg, .alert-danger, [class*='error']").count() > 0
+        # The submit button should be DISABLED — that is the portal's validation response
+        submit_btn = page.locator("button.large-button-primary")
+        submit_btn.wait_for(state="visible", timeout=5000)
 
-        assert not password_visible or error_visible, (
-            "An invalid PAN should either show an error or block progression to the password step"
+        assert submit_btn.is_disabled(), (
+            "Submit button should remain disabled for an invalid PAN format — "
+            "the portal performs client-side format validation before allowing progression"
+        )
+
+        # Also confirm we have NOT advanced to the password step
+        assert not page.locator("#loginPasswordField").is_visible(), (
+            "Password field should not appear when PAN format is invalid"
         )
