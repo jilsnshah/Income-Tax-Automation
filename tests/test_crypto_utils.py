@@ -13,13 +13,12 @@ These run in under 1 second and are safe for all CI environments.
 """
 
 import os
-import shutil
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 # Attempt to import; skip module if dependencies missing
 try:
-    from crypto_utils import decrypt_pdf, decrypt_zip, process_client_files
+    from crypto_utils import decrypt_pdf, process_client_files
 except ImportError as e:
     pytest.skip(f"crypto_utils import failed: {e}", allow_module_level=True)
 

@@ -1,6 +1,5 @@
 from playwright.sync_api import sync_playwright
 import time
-import os
 
 def run_ui_test():
     with sync_playwright() as p:

@@ -1,10 +1,8 @@
-import time
 import os
 from loguru import logger
-from playwright.sync_api import sync_playwright, Page, BrowserContext, TimeoutError as PlaywrightTimeout
+from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeout
 from playwright_stealth import Stealth
-from config import LOGIN_URL, DASHBOARD_URL, TIMEOUT_MS, ASSESSMENT_YEAR
-from utils import get_html_filename, get_text_filename
+from config import LOGIN_URL, TIMEOUT_MS, ASSESSMENT_YEAR
 from crypto_utils import process_client_files
 
 def download_ais_tis_file(ais_page, pan: str, document_name: str, output_path: str, timeout: int = 60000):
@@ -32,7 +30,7 @@ def download_ais_tis_file(ais_page, pan: str, document_name: str, output_path: s
             logger.info(f"[{pan}] Saved {document_name} to {output_path}")
             ais_page.screenshot(path=f"{output_path.rsplit('/', 1)[0]}/{pan}_smooth_success.png")
             return
-        except Exception as e:
+        except Exception:
             logger.info(f"[{pan}] Did not start direct download within 30s. Checking if button changed to Activity History...")
             # Fall through to Activity History logic below
     
@@ -56,12 +54,12 @@ def download_ais_tis_file(ais_page, pan: str, document_name: str, output_path: s
                 # To refresh: Click AIS tab on header, then click Activity history tab
                 try:
                     ais_page.click('div.tab-header:has-text("AIS"), a:has-text("AIS"), text="AIS"', timeout=2000, force=True)
-                except:
+                except Exception:
                     pass
                 ais_page.wait_for_timeout(2000)
                 try:
                     ais_page.click('text=/Activity history/i', force=True)
-                except:
+                except Exception:
                     pass
                 continue
             
@@ -80,7 +78,7 @@ def download_ais_tis_file(ais_page, pan: str, document_name: str, output_path: s
                 logger.info(f"[{pan}] Navigating back to main AIS tab...")
                 try:
                     ais_page.click('div.tab-header:has-text("AIS"), a:has-text("AIS"), text="AIS"', timeout=2000, force=True)
-                except:
+                except Exception:
                     pass
                 ais_page.wait_for_timeout(2000)
                 # Ensure we click the "Download AIS/TIS" button again to reopen the modal for the next file
@@ -285,13 +283,13 @@ def download_26as_for_client(pan: str, password: str, dob: str, output_dir: str,
                         logger.warning(f"[{pan}] Hit random AIS network error popup. Clicking Ok...")
                         try:
                             ais_page.click('button:has-text("Ok")', force=True, timeout=1000)
-                        except:
+                        except Exception:
                             pass
                         logger.info(f"[{pan}] Closing tab and retrying AIS navigation...")
                         try:
                             if not ais_page.is_closed():
                                 ais_page.close()
-                        except:
+                        except Exception:
                             pass
                         continue
                 except PlaywrightTimeout:
@@ -309,7 +307,7 @@ def download_26as_for_client(pan: str, password: str, dob: str, output_dir: str,
                     try:
                         if not ais_page.is_closed():
                             ais_page.close()
-                    except:
+                    except Exception:
                         pass
                     continue
                 
@@ -348,7 +346,7 @@ def download_26as_for_client(pan: str, password: str, dob: str, output_dir: str,
                 try:
                     if not ais_page.is_closed():
                         ais_page.screenshot(path=f"{output_dir}/{pan}_ais_error.png", full_page=True)
-                except:
+                except Exception:
                     pass
                 raise e
             
@@ -360,7 +358,7 @@ def download_26as_for_client(pan: str, password: str, dob: str, output_dir: str,
             for f in glob.glob(os.path.join(output_dir, f"{pan}*.html")):
                 try:
                     os.remove(f)
-                except:
+                except Exception:
                     pass
             
             return True, "OK"

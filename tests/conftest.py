@@ -10,7 +10,7 @@ Credentials are loaded from environment variables. Set them before running:
 import os
 import shutil
 import pytest
-from playwright.sync_api import sync_playwright, BrowserContext
+from playwright.sync_api import sync_playwright
 from playwright_stealth import Stealth
 
 

@@ -1,5 +1,6 @@
 from utils import setup_logging, ensure_output_dir
 from scraper import download_26as_for_client
+# pyrefly: ignore [missing-import]
 from loguru import logger
 import os
 

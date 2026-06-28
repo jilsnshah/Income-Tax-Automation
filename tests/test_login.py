@@ -14,7 +14,6 @@ Test design: equivalence partitioning — one representative from the valid part
 and one from the invalid partition for each input dimension.
 """
 
-import pytest
 from playwright.sync_api import TimeoutError as PlaywrightTimeout
 
 LOGIN_URL = "https://eportal.incometax.gov.in/iec/foservices/#/login"

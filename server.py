@@ -4,7 +4,6 @@ from typing import List
 import pandas as pd
 from fastapi.middleware.cors import CORSMiddleware
 import os
-import time
 from loguru import logger
 from collections import deque
 from scraper import download_26as_for_client

@@ -12,7 +12,6 @@ no network required, no credentials needed. Safe to run in any CI environment.
 """
 
 import pytest
-import httpx
 from fastapi.testclient import TestClient
 
 
