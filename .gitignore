@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Credentials — NEVER commit these
+.env
+*.env
+
+# Pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+*.xml
+
+# Logs and run artifacts
+run.log
+*.log
+
+# Output directories (contain downloaded tax documents)
+output/
+test_output/
+out/
+
+# Screenshots and debug dumps (generated at runtime)
+*.png
+*_dom.html
+login_error*.html
+
+# macOS
+.DS_Store
+
+# Node
+node_modules/
