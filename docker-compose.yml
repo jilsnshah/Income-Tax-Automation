@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend.Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - PLAYWRIGHT_HEADLESS=true
+    volumes:
+      # Map the output directory so downloaded PDFs are accessible on your host machine
+      - ./output:/app/output
+      # Optional: mount the .env file if it exists
+      - ./.env:/app/.env
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      # Exposes the React app on port 5173 to match the local Vite dev server experience
+      - "5173:80"
+    depends_on:
+      - backend

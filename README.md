@@ -94,7 +94,22 @@ Upload failure screenshots as artifacts
 
 ---
 
-## Setup
+## Running with Docker (Recommended)
+
+To run the full stack (React frontend + FastAPI backend + Playwright dependencies) isolated on your machine without installing Node.js or Python packages locally:
+
+1. Ensure [Docker Desktop](https://www.docker.com/products/docker-desktop/) is installed and running.
+2. Clone the repository and run:
+   ```bash
+   docker-compose up --build
+   ```
+3. Open **http://localhost:5173** in your browser.
+
+*Note: Downloaded tax documents will securely map to the local `./output` directory on your host machine via Docker volumes.*
+
+---
+
+## Setup (Local Installation)
 
 ### Prerequisites
 - Python 3.9+
