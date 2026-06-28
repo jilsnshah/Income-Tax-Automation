@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 from loguru import logger
 from collections import deque
-from scraper import download_26as_for_client
+from src.scraper import download_26as_for_client
 
 # Custom loguru sink for API streaming
 memory_logs = deque(maxlen=200)

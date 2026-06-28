@@ -1,6 +1,6 @@
 import os
 from loguru import logger
-from config import OUTPUT_DIR
+from src.config import OUTPUT_DIR
 
 def setup_logging():
     # Setup loguru to output to console and file

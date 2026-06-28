@@ -18,7 +18,7 @@ from unittest.mock import patch
 
 # Attempt to import; skip module if dependencies missing
 try:
-    from crypto_utils import decrypt_pdf, process_client_files
+    from src.crypto_utils import decrypt_pdf, process_client_files
 except ImportError as e:
     pytest.skip(f"crypto_utils import failed: {e}", allow_module_level=True)
 
@@ -141,8 +141,8 @@ class TestProcessClientFilesCleanup:
         open(extra, "w").close()
 
         # Patch the decrypt functions so we don't need real PDFs
-        with patch("crypto_utils.decrypt_pdf", return_value=True), \
-             patch("crypto_utils.decrypt_zip", return_value=True):
+        with patch("src.crypto_utils.decrypt_pdf", return_value=True), \
+             patch("src.crypto_utils.decrypt_zip", return_value=True):
             process_client_files(pan, dob, out)
 
         remaining = set(os.listdir(out))

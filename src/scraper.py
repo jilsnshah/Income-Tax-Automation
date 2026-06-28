@@ -2,8 +2,8 @@ import os
 from loguru import logger
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeout
 from playwright_stealth import Stealth
-from config import LOGIN_URL, TIMEOUT_MS, ASSESSMENT_YEAR
-from crypto_utils import process_client_files
+from src.config import LOGIN_URL, TIMEOUT_MS, ASSESSMENT_YEAR
+from src.crypto_utils import process_client_files
 
 def download_ais_tis_file(ais_page, pan: str, document_name: str, output_path: str, timeout: int = 60000):
     """

@@ -17,7 +17,7 @@ from fastapi.testclient import TestClient
 
 # Import the FastAPI app; skip the entire module if server dependencies are missing.
 try:
-    from server import app
+    from src.server import app
 except ImportError as e:
     pytest.skip(f"server.py import failed: {e}", allow_module_level=True)
 

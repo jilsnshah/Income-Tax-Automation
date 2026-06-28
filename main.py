@@ -1,6 +1,13 @@
-from utils import setup_logging, ensure_output_dir
-from scraper import download_26as_for_client
-# pyrefly: ignore [missing-import]
+"""
+main.py — CLI entry point for single-run batch processing.
+
+Reads credentials from environment variables (IT_PAN, IT_PASSWORD, IT_DOB).
+For bulk processing via GUI, start the FastAPI server instead:
+    python -m src.server
+"""
+
+from src.utils import setup_logging, ensure_output_dir
+from src.scraper import download_26as_for_client
 from loguru import logger
 import os
 

@@ -7,7 +7,7 @@ Run with:
 """
 
 import os
-from scraper import download_26as_for_client
+from src.scraper import download_26as_for_client
 from loguru import logger
 
 
