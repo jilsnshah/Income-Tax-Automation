@@ -1,6 +1,6 @@
 # Form 26AS & AIS Automation Framework
 
-[![CI](https://github.com/YOUR_USERNAME/YOUR_REPO/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/YOUR_REPO/actions/workflows/ci.yml)
+[![CI](https://github.com/jilsnshah/Income-Tax-Automation/actions/workflows/ci.yml/badge.svg)](https://github.com/jilsnshah/Income-Tax-Automation/actions/workflows/ci.yml)
 
 > **End-to-end Playwright automation framework for downloading, decrypting, and batch-processing Indian Income Tax documents (Form 26AS, AIS, TIS) — built with a FastAPI backend, React frontend, and a full pytest test suite.**
 
